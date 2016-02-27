@@ -1,6 +1,6 @@
 # ShinyModulesDemo
 
-In app.R we create a simple app that involves quite a bit of code replication. In app_module.R we refactor the application to use Shiny Modules.
+In appOriginal.R we create a simple app that involves quite a bit of code replication. In appModules.R we refactor the application to use Shiny Modules.
 
 The code is available on Github: https://github.com/slopp/ShinyModulesDemo
 

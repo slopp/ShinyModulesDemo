@@ -14,7 +14,7 @@ nb.classifier <- naiveBayes(iris.train, iris.true)
 nb.clusters <- factor(as.integer(predict(nb.classifier,iris.train)))
 
 # SVM
-nb.classifier <- svm(iris.train, iris.true)
+svm.classifier <- svm(iris.train, iris.true)
 svm.clusters <- factor(as.integer(predict(svm.classifier,iris.train)))
 
 iris.result <- cbind(iris.train, nb.clusters, svm.clusters)
@@ -56,5 +56,5 @@ server <- shinyServer(function(input, output){
   
 })   
 
-shinyApp(ui, server)
+#shinyApp(ui, server)
   

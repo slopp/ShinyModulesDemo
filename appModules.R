@@ -11,7 +11,7 @@ iris.true <- iris[,5]
 iris.train <- iris[,-5] # no cheating
 
 # Naive Bayes
-classifier <- naiveBayes(iris.train, iris.true)
+nb.classifier <- naiveBayes(iris.train, iris.true)
 nb.clusters <- factor(as.integer(predict(nb.classifier,iris.train)))
 
 # SVM
@@ -49,10 +49,10 @@ cluster <- function(input, output,session,result, column){
 
 ui <- fixedPage(
   titlePanel("Classification Comparison Tool"),
-  p("SVM and Naive Bayes algorithms were used to cluster the iris dataset. Here we are plotting the 'fitted' results. The numeric labels are arbitrary, focus on grouping results not blue-blue, red-red, etc."),
+  p("SVM and Naive Bayes algorithms were used to cluster the iris dataset. Here we are plotting the 'fitted' results."),
   column(width = 6, 
             h1("Support Vector Machine"),
-            clusterUI("kmeans", iris.train)
+            clusterUI("svm", iris.train)
          
   ),
   column(width=6,
