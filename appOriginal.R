@@ -2,6 +2,7 @@ library(shiny)
 library(e1071) 
 library(ggplot2)
 
+
 #---------------------
 # Define Clusters
 #---------------------
@@ -20,41 +21,49 @@ svm.clusters <- factor(as.integer(predict(svm.classifier,iris.train)))
 iris.result <- cbind(iris.train, nb.clusters, svm.clusters)
 
 #---------------------
+# Module Code
+#---------------------
+
+
+clusterUI <- function(id, train){
+  ns <- NS(id)
+  tagList(
+    plotOutput(ns("plot")),
+    selectInput(ns("x"), label = "X Variable", choices=colnames(train)),
+    selectInput(ns("y"), label = "Y Variable", choices=colnames(train))
+  )
+  
+}
+
+cluster <- function(input, output,session,result, column){
+  output$plot<- renderPlot({
+    ggplot(result,aes_string(x=input$x, y=input$y,color=column)) + geom_point()
+  })
+  
+}
+
+#---------------------
 # Application Code
 #---------------------
 
 
-ui <- fluidPage(
-   titlePanel("Classification Comparison Tool"),
-   p("SVM and Naive Bayes algorithms were used to cluster the iris dataset. Here we are plotting the 'fitted' results."),
-   column(width = 6, 
-          fluidRow(h1("Support Vector Machine"),
-                   plotOutput("svm.plot")
-                   ),
-          fluidRow(selectInput("svm.x", label = "X Variable", choices=colnames(iris.train)),
-                   selectInput("svm.y", label = "Y Variable", choices=colnames(iris.train))
-                   )
-   ),
-   column(width=6,
-          fluidRow(h1("Naive Bayes"),
-                   plotOutput("nb.plot")
-                   ),
-          fluidRow(selectInput("nb.x", label="X Variable", choices=colnames(iris.train)),
-                   selectInput("nb.y", label="Y Variable", choices=colnames(iris.train))
-                   )
-    )
+ui <- fixedPage(
+  titlePanel("Classification Comparison Tool"),
+  p("SVM and Naive Bayes algorithms were used to cluster the iris dataset. Here we are plotting the 'fitted' results."),
+  column(width = 6, 
+            h1("Support Vector Machine"),
+            clusterUI("svm", iris.train)
+         
+  ),
+  column(width=6,
+            h1("Naive Bayes"),
+            clusterUI("nb", iris.train)
+  )
 )
 
-server <- shinyServer(function(input, output){
-  output$svm.plot<- renderPlot({
-    ggplot(iris.result,aes_string(x=input$svm.x, y=input$svm.y,color='svm.clusters')) + geom_point()
-  })
-  
-  output$nb.plot <- renderPlot({
-    ggplot(iris.result,aes_string(x=input$nb.x, y=input$nb.y, color='nb.clusters')) + geom_point()
-  })
-  
-})   
+server <- function(input, output){
+  callModule(cluster,"svm", iris.result, "svm.clusters")
+  callModule(cluster, "nb", iris.result, "nb.clusters")
+}
 
-#shinyApp(ui, server)
-  
+shinyApp(ui, server)
