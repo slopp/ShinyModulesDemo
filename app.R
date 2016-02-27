@@ -12,12 +12,13 @@ iris.train <- iris[,-5] # no cheating
 
 # Naive Bayes
 classifier <- naiveBayes(iris.train, iris.true)
-nb.clusters <- factor(as.integer(predict(classifier,iris.train)))
+nb.clusters <- factor(as.integer(predict(nb.classifier,iris.train)))
 
-#kmeans (k=3)
-km.clusters <- factor(kmeans(iris.train,3)$cluster)
+# SVM
+svm.classifier <- svm(iris.train, iris.true)
+svm.clusters <- factor(as.integer(predict(svm.classifier,iris.train)))
 
-iris.result <- cbind(iris.train, nb.clusters, km.clusters)
+iris.result <- cbind(iris.train, nb.clusters, svm.clusters)
 
 #---------------------
 # Module Code
@@ -47,9 +48,10 @@ cluster <- function(input, output,session,result, column){
 
 
 ui <- fixedPage(
-  titlePanel("Clustering Comparison Tool"),
+  titlePanel("Classification Comparison Tool"),
+  p("SVM and Naive Bayes algorithms were used to cluster the iris dataset. Here we are plotting the 'fitted' results. The numeric labels are arbitrary, focus on grouping results not blue-blue, red-red, etc."),
   column(width = 6, 
-            h1("K Means"),
+            h1("Support Vector Machine"),
             clusterUI("kmeans", iris.train)
          
   ),
@@ -60,7 +62,7 @@ ui <- fixedPage(
 )
 
 server <- function(input, output){
-  callModule(cluster,"kmeans", iris.result, "km.clusters")
+  callModule(cluster,"svm", iris.result, "svm.clusters")
   callModule(cluster, "nb", iris.result, "nb.clusters")
 }
 
