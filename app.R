@@ -2,6 +2,7 @@ library(shiny)
 library(e1071) 
 library(ggplot2)
 
+
 #---------------------
 # Define Clusters
 #---------------------
@@ -19,40 +20,48 @@ km.clusters <- factor(kmeans(iris.train,3)$cluster)
 iris.result <- cbind(iris.train, nb.clusters, km.clusters)
 
 #---------------------
+# Module Code
+#---------------------
+
+
+clusterUI <- function(id, train){
+  ns <- NS(id)
+  tagList(
+    plotOutput(ns("plot")),
+    selectInput(ns("x"), label = "X Variable", choices=colnames(train)),
+    selectInput(ns("y"), label = "Y Variable", choices=colnames(train))
+  )
+  
+}
+
+cluster <- function(input, output,session,result, column){
+  output$plot<- renderPlot({
+    ggplot(result,aes_string(x=input$x, y=input$y,color=column)) + geom_point()
+  })
+  
+}
+
+#---------------------
 # Application Code
 #---------------------
 
 
-ui <- fluidPage(
-   titlePanel("Clustering Comparison Tool"),
-   column(width = 6, 
-          fluidRow(h1("K Means"),
-                   plotOutput("kmeans.plot")
-                   ),
-          fluidRow(selectInput("kmeans.x", label = "X Variable", choices=colnames(iris.train)),
-                   selectInput("kmeans.y", label = "Y Variable", choices=colnames(iris.train))
-                   )
-          ),
-   column(width=6,
-          fluidRow(h1("Naive Bayes"),
-                   plotOutput("nb.plot")
-                   ),
-          fluidRow(selectInput("nb.x", label="X Variable", choices=colnames(iris.train)),
-                   selectInput("nb.y", label="Y Variable", choices=colnames(iris.train))
-                   )
-    )
+ui <- fixedPage(
+  titlePanel("Clustering Comparison Tool"),
+  column(width = 6, 
+            h1("K Means"),
+            clusterUI("kmeans", iris.train)
+         
+  ),
+  column(width=6,
+            h1("Naive Bayes"),
+            clusterUI("nb", iris.train)
+  )
 )
 
-server <- shinyServer(function(input, output){
-  output$kmeans.plot<- renderPlot({
-    ggplot(iris.result,aes_string(x=input$kmeans.x, y=input$kmeans.y,color='km.clusters')) + geom_point()
-  })
-  
-  output$nb.plot <- renderPlot({
-    ggplot(iris.result,aes_string(x=input$nb.x, y=input$nb.y, color='nb.clusters')) + geom_point()
-  })
-  
-})   
+server <- function(input, output){
+  callModule(cluster,"kmeans", iris.result, "km.clusters")
+  callModule(cluster, "nb", iris.result, "nb.clusters")
+}
 
 shinyApp(ui, server)
-  
