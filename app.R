@@ -10,13 +10,14 @@ iris.true <- iris[,5]
 iris.train <- iris[,-5] # no cheating
 
 # Naive Bayes
-classifier <- naiveBayes(iris.train, iris.true)
-nb.clusters <- factor(as.integer(predict(classifier,iris.train)))
+nb.classifier <- naiveBayes(iris.train, iris.true)
+nb.clusters <- factor(as.integer(predict(nb.classifier,iris.train)))
 
-#kmeans (k=3)
-km.clusters <- factor(kmeans(iris.train,3)$cluster)
+# SVM
+nb.classifier <- svm(iris.train, iris.true)
+svm.clusters <- factor(as.integer(predict(svm.classifier,iris.train)))
 
-iris.result <- cbind(iris.train, nb.clusters, km.clusters)
+iris.result <- cbind(iris.train, nb.clusters, svm.clusters)
 
 #---------------------
 # Application Code
@@ -24,15 +25,16 @@ iris.result <- cbind(iris.train, nb.clusters, km.clusters)
 
 
 ui <- fluidPage(
-   titlePanel("Clustering Comparison Tool"),
+   titlePanel("Classification Comparison Tool"),
+   p("SVM and Naive Bayes algorithms were used to cluster the iris dataset. Here we are plotting the 'fitted' results."),
    column(width = 6, 
-          fluidRow(h1("K Means"),
-                   plotOutput("kmeans.plot")
+          fluidRow(h1("Support Vector Machine"),
+                   plotOutput("svm.plot")
                    ),
-          fluidRow(selectInput("kmeans.x", label = "X Variable", choices=colnames(iris.train)),
-                   selectInput("kmeans.y", label = "Y Variable", choices=colnames(iris.train))
+          fluidRow(selectInput("svm.x", label = "X Variable", choices=colnames(iris.train)),
+                   selectInput("svm.y", label = "Y Variable", choices=colnames(iris.train))
                    )
-          ),
+   ),
    column(width=6,
           fluidRow(h1("Naive Bayes"),
                    plotOutput("nb.plot")
@@ -44,8 +46,8 @@ ui <- fluidPage(
 )
 
 server <- shinyServer(function(input, output){
-  output$kmeans.plot<- renderPlot({
-    ggplot(iris.result,aes_string(x=input$kmeans.x, y=input$kmeans.y,color='km.clusters')) + geom_point()
+  output$svm.plot<- renderPlot({
+    ggplot(iris.result,aes_string(x=input$svm.x, y=input$svm.y,color='svm.clusters')) + geom_point()
   })
   
   output$nb.plot <- renderPlot({
